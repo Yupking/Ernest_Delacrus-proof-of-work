@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ernest Delacrus — Web3 Proof of Work</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #080b10;
+    --surface: #0e1318;
+    --border: #1c2530;
+    --accent: #00e5ff;
+    --accent2: #7b61ff;
+    --gold: #f0c040;
+    --text: #c8d8e8;
+    --muted: #5a7080;
+    --white: #eaf4ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    line-height: 1.75;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 52px 0 36px;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 10px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+    opacity: 0.85;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .subtitle a {
+    color: var(--accent2);
+    text-decoration: none;
+  }
+
+  .subtitle a:hover { text-decoration: underline; }
+
+  /* ── INTRO ── */
+  .intro {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 24px 28px;
+    margin-bottom: 52px;
+    border-radius: 2px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .intro p {
+    color: var(--text);
+    font-size: 13.5px;
+    line-height: 1.8;
+  }
+
+  /* ── SECTION ── */
+  section {
+    margin-bottom: 52px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  section:nth-child(2) { animation-delay: 0.15s; }
+  section:nth-child(3) { animation-delay: 0.25s; }
+  section:nth-child(4) { animation-delay: 0.35s; }
+  section:nth-child(5) { animation-delay: 0.45s; }
+
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-label .num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+  }
+
+  .section-label h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--white);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── PROJECT CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 28px 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .card:hover { border-color: var(--accent2); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover::before { opacity: 1; }
+
+  .card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .card-head h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+  }
+
+  .badge {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 3px 9px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .badge-blue { background: rgba(0,229,255,0.1); color: var(--accent); border: 1px solid rgba(0,229,255,0.25); }
+  .badge-purple { background: rgba(123,97,255,0.1); color: var(--accent2); border: 1px solid rgba(123,97,255,0.25); }
+  .badge-gold { background: rgba(240,192,64,0.1); color: var(--gold); border: 1px solid rgba(240,192,64,0.25); }
+
+  .card p {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .deliverables {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .deliverables li {
+    font-size: 12.5px;
+    color: var(--muted);
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .deliverables li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 11px;
+  }
+
+  .proof-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(123,97,255,0.3);
+    padding-bottom: 1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .proof-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── SKILLS GRID ── */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .skill-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 14px 16px;
+    font-size: 12px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .skill-item .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-blue { background: var(--accent); }
+  .dot-purple { background: var(--accent2); }
+  .dot-gold { background: var(--gold); }
+
+  /* ── PORTFOLIO CALLOUT ── */
+  .portfolio-box {
+    background: linear-gradient(135deg, rgba(0,229,255,0.05), rgba(123,97,255,0.08));
+    border: 1px solid var(--accent2);
+    border-radius: 4px;
+    padding: 28px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .portfolio-box p {
+    font-size: 13px;
+    color: var(--text);
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  .portfolio-box p strong {
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent2);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 3px;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn:hover { background: var(--accent); color: var(--bg); transform: translateY(-1px); }
+
+  /* ── CONTACT ── */
+  .contact-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .contact-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+
+  .contact-item span { color: var(--accent); font-size: 10px; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    margin-top: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  footer p {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  footer .mark {
+    font-size: 10px;
+    color: var(--border);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .portfolio-box { flex-direction: column; }
+    .card-head { flex-direction: column; }
+  }
+
+  /* Print styles */
+  @media print {
+    body { background: #fff; color: #111; }
+    .card, .intro, .portfolio-box { border-color: #ccc; background: #f9f9f9; }
+    h1, h2, h3 { color: #000; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="tag">Proof of Work</div>
+    <h1>Ernest <span>Delacrus</span></h1>
+    <p class="subtitle">
+      Crypto KOL &amp; Content Creator &nbsp;·&nbsp; Web3 Community Manager &nbsp;·&nbsp;
+      <a href="https://twitter.com/ernest_delacrus" target="_blank">@ernest_delacrus</a> &nbsp;·&nbsp;
+      Telegram: <a href="https://t.me/Ernstodelacrus" target="_blank">@Ernstodelacrus</a>
+    </p>
+  </header>
+
+  <!-- INTRO -->
+  <div class="intro">
+    <p>
+      This document presents verified proof of work across three active crypto campaigns. Each project demonstrates
+      hands-on content creation, community strategy, and KOL execution — not just theory, but real deliverables
+      shipped for real protocols. I operate at the intersection of narrative, community, and on-chain culture.
+    </p>
+  </div>
+
+  <!-- PROJECT 1: ToPerle -->
+  <section>
+    <div class="section-label">
+      <span class="num">01</span>
+      <h2>Campaign Work</h2>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>#ToPerle Campaign — Perle Labs</h3>
+        <span class="badge badge-blue">KOL Content</span>
+      </div>
+      <p>
+        Created and executed a full content push for the <strong>#ToPerle</strong> campaign under Perle Labs.
+        Deliverables spanned multiple formats — tweets, a long-form thread, meme cards, and three production-ready
+        infographics — all aligned to the campaign's messaging and visual identity.
+      </p>
+      <ul class="deliverables">
+        <li>Authored campaign tweets and a multi-part X thread for organic reach</li>
+        <li>Produced 3 branded infographics optimized for social sharing</li>
+        <li>Created meme card assets to drive community engagement</li>
+        <li>Maintained consistent brand voice across all formats</li>
+      </ul>
+      <span class="badge badge-blue">Infographics · Thread Writing · Meme Content · Campaign Strategy</span>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>CoinUp.io — Giveaway Campaigns</h3>
+        <span class="badge badge-purple">Community Activation</span>
+      </div>
+      <p>
+        Produced copy and content for CoinUp's April Fools and International Women's Day giveaway campaigns.
+        Focus was on human-sounding, authentic copy that cuts through the noise — built for engagement,
+        not to read like a press release.
+      </p>
+      <ul class="deliverables">
+        <li>April Fools campaign: creative copy with crypto-native humor and CTA</li>
+        <li>Women's Day campaign: community-oriented messaging for Southeast Asia outreach</li>
+        <li>KOL recruitment copy written in a credible, peer-to-peer tone</li>
+        <li>Bear market positioning content for CoinUp's regional audience</li>
+      </ul>
+      <span class="badge badge-purple">Copywriting · Campaign Activation · Community Tone</span>
+    </div>
+
+  </section>
+
+  <!-- PROJECT 2: 30-Day KOL Calendar -->
+  <section>
+    <div class="section-label">
+      <span class="num">02</span>
+      <h2>Strategy & Planning</h2>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>30-Day KOL Content Calendar</h3>
+        <span class="badge badge-gold">Thought Leadership</span>
+      </div>
+      <p>
+        Built a complete 30-day content calendar designed to position myself as a credible voice in
+        Web3/DeFi — targeting ghostwriting clients, community-building opportunities, and brand strategy
+        mandates. Rendered as an interactive planning tool with daily post types, themes, and hooks.
+      </p>
+      <ul class="deliverables">
+        <li>Day-by-day content plan across 4 weekly pillars (education, opinion, community, promo)</li>
+        <li>Hooks, formats, and CTAs mapped to audience growth goals</li>
+        <li>Designed to attract inbound interest from Web3 projects within 30 days</li>
+        <li>Covers ghostwriting, community building, and brand strategy positioning</li>
+      </ul>
+      <span class="badge badge-gold">Content Strategy · KOL Positioning · Audience Growth</span>
+    </div>
+
+  </section>
+
+  <!-- SKILLS -->
+  <section>
+    <div class="section-label">
+      <span class="num">03</span>
+      <h2>Core Competencies</h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-item"><span class="dot dot-blue"></span>X / Twitter Content</div>
+      <div class="skill-item"><span class="dot dot-blue"></span>Thread Writing</div>
+      <div class="skill-item"><span class="dot dot-blue"></span>Infographic Production</div>
+      <div class="skill-item"><span class="dot dot-purple"></span>Community Management</div>
+      <div class="skill-item"><span class="dot dot-purple"></span>Campaign Copywriting</div>
+      <div class="skill-item"><span class="dot dot-purple"></span>Meme & Visual Content</div>
+      <div class="skill-item"><span class="dot dot-gold"></span>KOL Strategy</div>
+      <div class="skill-item"><span class="dot dot-gold"></span>Audience Growth</div>
+      <div class="skill-item"><span class="dot dot-gold"></span>Brand Voice Development</div>
+    </div>
+  </section>
+
+  <!-- MY EDGE -->
+  <section>
+    <div class="section-label">
+      <span class="num">04</span>
+      <h2>My Edge</h2>
+    </div>
+
+    <div class="card">
+      <p>
+        I don't approach Web3 like a marketer. I operate like a native.
+      </p>
+
+      <ul class="deliverables">
+        <li>I write in a voice that feels human — not like a brand trying to fit in</li>
+        <li>I understand CT culture, narratives, and timing — not just content calendars</li>
+        <li>I combine content, community, and positioning into one system</li>
+        <li>I prioritize clarity and attention — not noise</li>
+        <li>I ship fast, iterate faster, and optimize based on real response</li>
+      </ul>
+
+      <span class="badge badge-gold">
+        Narrative · Culture · Execution · Speed
+      </span>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section>
+    <div class="section-label">
+      <span class="num">05</span>
+      <h2>Contact</h2>
+    </div>
+
+    <div class="portfolio-box">
+      <p>
+        <strong>Open to KOL campaigns, content strategy, and community roles.</strong><br/><br/>
+        If you're building in Web3 and need someone who understands narrative, culture,
+        and execution — let's work.
+      </p>
+
+      <a href="https://twitter.com/ernest_delacrus" target="_blank" class="btn">
+        DM Me on X →
+      </a>
+    </div>
+
+    <div class="contact-row" style="margin-top: 20px;">
+      <div class="contact-item"><span>✦</span> X / Twitter: @ernest_delacrus</div>
+      <div class="contact-item"><span>✦</span> Telegram: @Ernstodelacrus</div>
+      <div class="contact-item"><span>✦</span> Location: Nigeria</div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Ernest Delacrus · Crypto KOL & Content Creator · 2026</p>
+    <p class="mark">Proof of Work Document</p>
+  </footer>
+
+</div>
+</body>
+</html>
